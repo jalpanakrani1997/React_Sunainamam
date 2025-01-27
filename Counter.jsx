@@ -23,3 +23,28 @@ export default function Counter() {
         </>
     )
 }
+
+// import React, { useRef, useState } from 'react'
+
+// export default function Timer() {
+//     const [count, setCounter] = useState(0)
+
+//     var id = useRef(null);
+//     console.log(id)
+//     function start() {
+//         id.current = setInterval(() => {
+//             setCounter((prev) => prev + 1)
+//             console.log(id.current)
+//         }, 1000)
+//     }
+//     function stop() {
+//         clearInterval(id.current)
+//     }
+//     return (
+//         <>
+//             <div>{count}</div>
+//             <button onClick={start}>start</button>
+//             <button onClick={stop}>stop</button>
+//         </>
+//     )
+// }
