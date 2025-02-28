@@ -1,72 +1,86 @@
+ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
-export default function ApiHunter() {
-    const [state, setState] = useState([]);
-    const [task, setTask] = useState({ id: '', title: '', body: '' });
+export default function AxiosForm() {
+    const [data, setData] = useState({ id: '', title: '' });
+    const [form, setForm] = useState([]);
+    const [edit, setEdit] = useState(false);
+    const [editId, setEditId] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:3000/Todo')
-            .then((res) => res.json())
-            .then(setState);
+        fetchAxios();
     }, []);
 
-    const addTask = (e) => {
-        e.preventDefault();
+    const fetchAxios = () => {
+        axios.get('http://localhost:3007/Todo')
+            .then((res) => setForm(res.data))
+    };
 
-        if (task.id) {
-            fetch(`http://localhost:3000/Todo/${task.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(task),
-            }).then(() => {
-                setState(state.map((item) => (item.id === task.id ? task : item)));
-                setTask({ id: '', title: '', body: '' });
-            });
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!data.id.trim() || !data.title.trim()) {
+            alert('Both ID and Title are required');
+            return;
+        }
+
+        const numericId = String(data.id);
+        if (edit) {
+            axios.put(`http://localhost:3007/Todo/${editId}`, { id: editId, title: data.title })
+                .then(() => {
+                    fetchAxios();
+                    resetForm();
+                })
         } else {
-            fetch('http://localhost:3000/Todo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: task.title, body: task.body })
-            })
-                .then((res) => res.json())
-                .then((newTask) => {
-                    setState([...state, newTask]);
-                    setTask({ id: '', title: '', body: '' });
-                });
+            axios.post('http://localhost:3007/Todo', { id: numericId, title: data.title })
+                .then(() => {
+                    fetchAxios();
+                    resetForm();
+                })
         }
     };
 
-    const deleteTask = (id) => {
-        fetch(`http://localhost:3000/Todo/${id}`, { method: 'DELETE' }).then(() => {
-            setState(state.filter((task) => task.id !== id));
-        });
+    const resetForm = () => {
+        setData({ id: '', title: '' });
+        setEdit(false);
+        setEditId(null);
     };
 
-    const editTask = (task) => {
-        setTask(task)
+    const handleInputChange = (e) => {
+        setData({ ...data, [e.target.name]: e.target.value });
+    };
+
+    const handleDelete = (id) => {
+        axios.delete(`http://localhost:3007/Todo/${id}`)
+            .then(() => fetchAxios())
+    };
+
+    const handleEdit = (id) => {
+        const editTodo = form.find((todo) => todo.id === id);
+        if (editTodo) {
+            setData({ id: editTodo.id.toString(), title: editTodo.title });
+            setEdit(true);
+            setEditId(id);
+        }
     };
 
     return (
         <div>
-            <h1>API Hunter</h1>
-            <form onSubmit={addTask}>
-                <input type="text" placeholder="Title" value={task.title}
-                    onChange={(e) => setTask({ ...task, title: e.target.value })} />
-                <input type="text" placeholder="Body" value={task.body}
-                    onChange={(e) => setTask({ ...task, body: e.target.value })} />
-                <button type="submit">{task.id ? 'Update' : 'Add'}</button>
+            <h2>Axios CRUD Todo List</h2>
+            <form onSubmit={handleSubmit}>
+                <input type="text" placeholder="ID" name="id" value={data.id} onChange={handleInputChange} disabled={edit} />
+                <input type="text" placeholder="Title" name="title" value={data.title} onChange={handleInputChange} />
+                <button type="submit">{edit ? 'Update' : 'Submit'}</button>
+                {edit && <button type="button" onClick={resetForm}>Cancel</button>}
             </form>
-
-            {
-                state.map((item) => (
-                    <div key={item.id}>
-                        <p>Title : {item.title}</p>
-                        <p>Body : {item.body}</p>
-                        <button onClick={() => deleteTask(item.id)}>Delete</button>
-                        <button onClick={() => editTask(item)}>Edit</button>
-                    </div>
-                ))
-            }
+            <ul>
+                {form.map((el) => (
+                    <li key={el.id}>
+                        ID: {el.id} - {el.title}
+                        <button onClick={() => handleEdit(el.id)}>Edit</button>
+                        <button onClick={() => handleDelete(el.id)}>Delete</button>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }
