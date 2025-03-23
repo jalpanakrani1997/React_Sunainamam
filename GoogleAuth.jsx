@@ -6,25 +6,25 @@ import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 // const auth = getAuth(app);
 
 export default function GoogleAuth() {
-    const [user, setUser] = useState(null);
-    const [isLogin, setIsLogin] = useState(false);
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [user, setUser] = useState(null)
+    const [isLogin, setIsLogin] = useState(false)
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
 
     function signUp() {
-        setError("");
+        setError("")
         createUserWithEmailAndPassword(auth, email, password)
             .then(() => {
-                setIsLogin(true);
+                setIsLogin(true)
             })
             .catch((error) => {
                 if (error.code === "auth/email-already-in-use") {
-                    setError("This email is already registered. Please log in.");
-                    setIsLogin(true);
+                    setError("This email is already registered. Please log in.")
+                    setIsLogin(true)
                 } else {
-                    setError(error.message);
+                    setError(error.message)
                 }
             });
     };
@@ -32,20 +32,21 @@ export default function GoogleAuth() {
     function googleLogin() {
         signInWithPopup(auth, provider)
             .then((result) => {
-                setUser(result.user);
+                setUser(result.user)
             })
             .catch((error) => {
-                setError(error.message);
+                setError(error.message)
             });
     };
 
     function logout ()   {
-        signOut(auth).then(() => {
-            setUser(null);
-            setIsLogin(false);
-            setName("");
-            setEmail("");
-            setPassword("");
+        signOut(auth)
+            .then(() => {
+            setUser(null)
+            setIsLogin(false)
+            setName("")
+            setEmail("")
+            setPassword("")
         });
     };
 
@@ -65,11 +66,11 @@ export default function GoogleAuth() {
                                     }
 
                                     <div className="mb-3">
-                                        <input type="text" className="form-control" placeholder="Enter your name"
+                                          <input type="text" className="form-control" placeholder="Enter your name"
                                             value={name} onChange={(e) => setName(e.target.value)} />
                                     </div>
                                     <div className="mb-3">
-                                        <input type="email" className="form-control" placeholder="Enter your email"
+                                           <input type="email" className="form-control" placeholder="Enter your email"
                                             value={email} onChange={(e) => setEmail(e.target.value)} />
                                     </div>
                                     <div className="mb-3">
@@ -80,6 +81,7 @@ export default function GoogleAuth() {
                                     <button className="btn btn-primary w-100" onClick={signUp}>Signup</button>
                                     <p className="text-center mt-3">
                                         Already have an account?{" "}
+                                        
                                         <button className="btn btn-link p-0" onClick={() => setIsLogin(true)}>Login</button>
                                     </p>
                                     
